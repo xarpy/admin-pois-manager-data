@@ -1,0 +1,36 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = false
+
+[*.py]
+indent_size = 4
+max_line_length = 120
+combine_as_imports = true
+multi_line_output = 4
+quote_type = double
+
+[*.yml]
+indent_size = 2
+
+[*.{diff,md}]
+trim_trailing_whitespace = false
+
+[*.html]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+quote_type = double
+insert_final_newline = ignore
+
+[*.{sass,scss,less}]
+indent_size = 2

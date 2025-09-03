@@ -198,3 +198,4 @@ pyrightconfig.json
 logs/
 staticfiles/
 media/
+.artifacts
