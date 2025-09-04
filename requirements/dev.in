@@ -1,0 +1,15 @@
+-r base.in
+
+bandit==1.8.6
+black==25.1.0
+coverage==7.10.6
+flake8==7.3.0
+Flake8-pyproject==1.2.3
+interrogate==1.7.0
+ipdb==0.13.13
+isort==6.0.1
+mypy==1.17.1
+pre-commit==4.3.0
+pytest==8.4.1
+pytest-cov==6.2.1
+pytest-django==4.11.1
