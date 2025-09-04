@@ -48,6 +48,19 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+If want to use the test user, only need to load the data:
+
+```bash
+python manage.py loaddata adminuser.json
+```
+
+**Obs:** The login and password are:
+
+```text
+Login - test
+Password - 12345
+```
+
 ---
 
 ## ▶️ Running the App
@@ -193,8 +206,56 @@ poi_id, poi_name, poi_latitude, poi_longitude, poi_category, poi_ratings
 
 ## 🧱 Project Structure
 
-```
-In construction...
+```text
+./
+├──  core/
+│   ├──  asgi.py
+│   ├──  __init__.py
+│   ├──  settings.py
+│   ├──  urls.py
+│   └──  wsgi.py
+├──  fixtures/
+├──  point_of_interest/
+│   ├──  management/
+│   │   └──  commands/
+│   │       └──  import_poi_file.py
+│   ├──  migrations/
+│   │   ├──  0001_initial.py
+│   │   └──  __init__.py
+│   ├──  admin.py
+│   ├──  apps.py
+│   ├──  enums.py
+│   ├──  exceptions.py
+│   ├──  __init__.py
+│   ├──  models.py
+│   ├──  schemas.py
+│   ├──  services.py
+│   └──  utils.py
+├──  requirements/
+│   ├──  base.in*
+│   ├──  base.txt
+│   ├──  dev.in*
+│   └──  dev.txt
+├──  scripts/
+│   └──  nginx.conf
+├──  tests/
+│   ├──  point_of_interest/
+│   │   ├──  conftest.py
+│   │   ├──  __init__.py
+│   │   ├──  test_admin.py
+│   │   ├──  test_command.py
+│   │   ├──  test_models.py
+│   │   ├──  test_schemas.py
+│   │   ├──  test_services.py
+│   │   └──  test_utils.py
+│   └──  __init__.py
+├──  docker-compose.yml*
+├──  Dockerfile*
+├──  env.example*
+├──  LICENSE
+├──  manage.py*
+├──  pyproject.toml*
+└──  README.md
 ```
 
 ---
