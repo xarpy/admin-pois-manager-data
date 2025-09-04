@@ -1,12 +1,54 @@
 import pytest
 from django.contrib.auth.models import User
+from django.test import RequestFactory
 
 from point_of_interest.models import POI, HistoricalImportData, SourceType
 
 
 @pytest.fixture
+def request_factory():
+    """Fixture request factory function"""
+    return RequestFactory()
+
+
+@pytest.fixture
+@pytest.mark.django_db
+def poi_factory():
+    """Fixture poi factory function"""
+
+    def _factory(**kwargs):
+        data = {
+            "external_id": "1234567",
+            "name": "Test POI",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "category": "test",
+            "ratings": [],
+            "description": "",
+        }
+        data.update(kwargs)
+        return POI.objects.create(**data)
+
+    return _factory
+
+
+@pytest.fixture
+@pytest.mark.django_db
+def historical_import_factory():
+    """Fixture historical import data factory function"""
+
+    def _factory(**kwargs):
+        data = {"source": SourceType.CSV, "filename": "test.csv"}
+        data.update(kwargs)
+        return HistoricalImportData.objects.create(**data)
+
+    return _factory
+
+
+@pytest.fixture
+@pytest.mark.django_db
 def create_user():
-    """Function responsible to generate a user fixture for tests.
+    """Fixture responsible to generate a user fixture for tests.
     Returns:
         user: Returns a user instance
     """
@@ -22,7 +64,7 @@ def create_user():
 @pytest.fixture
 @pytest.mark.django_db
 def create_poi_instance():
-    """Function responsible to generate a poi instance.
+    """Fixture responsible to generate a poi instance.
     Returns:
         POI: Returns a poi instance
     """
@@ -42,7 +84,7 @@ def create_poi_instance():
 @pytest.fixture
 @pytest.mark.django_db
 def create_historical_data_instance():
-    """Function responsible to generate a HistoricalImportData instance.
+    """Fixture responsible to generate a HistoricalImportData instance.
     Returns:
         HistoricalImportData: Returns a HistoricalImportData instance
     """
