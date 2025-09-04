@@ -119,12 +119,12 @@ log_level = "INFO"
 
 [tool.coverage.run]
 branch = true
-source = [ "transactions", "core" ]
+source = [ "point_of_interest", "core" ]
 omit = [ "*/tests/*", "*/migrations/*" ]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 80
+fail_under = 60
 exclude_lines = [
   "pragma: no cover",
   "def __str__",

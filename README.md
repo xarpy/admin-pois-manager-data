@@ -9,22 +9,24 @@ Project in Django to import **Points of Interest (PoIs)** from **CSV/JSON/XML** 
 
 ## 📚 Table of Contents
 
-- [🚀 Installation](#-installation)
-- [▶️ Running the App](#️-running-the-app)
-- [📦 Importing Data (CLI)](#-importing-data-cli)
-- [🛠 Admin Panel](#-admin-panel)
-- [🐳 Running with Docker](#-running-with-docker)
-- [📄 File Specifications](#-file-specifications)
-  - [CSV](#csv)
-  - [JSON](#json)
-  - [XML](#xml)
-- [🧱 Project Structure](#-project-structure)
-- [🧪 Testing](#-testing)
-- [📝 Assumptions \& Improvements](#-assumptions--improvements)
-  - [Assumptions](#assumptions)
-  - [Possible Improvements](#possible-improvements)
-- [🤝 Contributing](#-contributing)
-- [🪪 License](#-license)
+- [Admin PoIs Manager Data](#admin-pois-manager-data)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [🚀 Installation](#-installation)
+  - [▶️ Running the App](#️-running-the-app)
+  - [📦 Importing Data (CLI)](#-importing-data-cli)
+  - [🛠 Admin Panel](#-admin-panel)
+  - [🐳 Running with Docker](#-running-with-docker)
+  - [📄 File Specifications](#-file-specifications)
+    - [CSV](#csv)
+    - [JSON](#json)
+    - [XML](#xml)
+  - [🧱 Project Structure](#-project-structure)
+  - [🧪 Testing](#-testing)
+  - [📝 Assumptions \& Improvements](#-assumptions--improvements)
+    - [Assumptions](#assumptions)
+    - [Possible Improvements](#possible-improvements)
+  - [🤝 Contributing](#-contributing)
+  - [🪪 License](#-license)
 
 ---
 
@@ -203,6 +205,12 @@ To run the tests:
 
 ```bash
 pytest
+```
+
+To run with coverage:
+
+```bash
+pytest --cov=point_of_interest --cov=core --cov-fail-under=60
 ```
 
 ---
