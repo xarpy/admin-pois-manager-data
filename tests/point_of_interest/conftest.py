@@ -3,6 +3,39 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory
 
 from point_of_interest.models import POI, HistoricalImportData, SourceType
+from point_of_interest.services import ImportBuilder, ImportServiceError, ImportStats
+
+
+class ErrorBuilder(ImportBuilder):
+    def run(self):
+        raise ImportServiceError("Service error occurred")
+
+
+class DummyBuilder(ImportBuilder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(paths=[], chunksize=1, batch_size=1)
+
+    def run(self):
+        return ImportStats(files_processed=2, created=5, updated=3)
+
+
+class FailingImportData:
+    @staticmethod
+    def from_row(row, source):
+        raise RuntimeError("boom")
+
+
+class DummyImportData:
+    def __init__(self, row, source):
+        self._row = row
+        self._source = source
+
+    @staticmethod
+    def from_row(row, source):
+        return DummyImportData(row, source)
+
+    def to_dict(self):
+        return {"ok": True, "row": self._row, "source": self._source}
 
 
 @pytest.fixture

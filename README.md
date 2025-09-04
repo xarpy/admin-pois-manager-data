@@ -15,9 +15,14 @@ Project in Django to import **Points of Interest (PoIs)** from **CSV/JSON/XML** 
 - [🛠 Admin Panel](#-admin-panel)
 - [🐳 Running with Docker](#-running-with-docker)
 - [📄 File Specifications](#-file-specifications)
+  - [CSV](#csv)
+  - [JSON](#json)
+  - [XML](#xml)
 - [🧱 Project Structure](#-project-structure)
 - [🧪 Testing](#-testing)
 - [📝 Assumptions \& Improvements](#-assumptions--improvements)
+  - [Assumptions](#assumptions)
+  - [Possible Improvements](#possible-improvements)
 - [🤝 Contributing](#-contributing)
 - [🪪 License](#-license)
 
@@ -63,13 +68,10 @@ python manage.py import_poi_file data/pois.csv
 
 # Multiple files and globs
 python manage.py import_poi_file data/pois.csv data/london.json data/*.xml
-
-# Dry run (parse and summarize, without saving to the database)
-python manage.py import_poi_file --dry-run data/pois.csv
 ```
 
 - The command detects the type by the **suffix** (`.csv`, `.json`, `.xml`).
-- **Deduplication**: a PoI is identified by `(internal_id, external_id)`. Repeated entries are **updated** (upsert).
+- **Duplication**: a PoI is identified by `external_id`. Repeated entries are **updated** (upsert).
 - `ratings` accepts several formats:
   - JSON array: `“[4, 5, 3.5]”`
   - separated string: `“4|3;5, 4.5”`
@@ -113,9 +115,9 @@ docker compose up --build
 Import the data **inside** to the container:
 
 ```bash
-docker-compose exec backend python manage.py import_poi data/pois.csv
-docker-compose exec backend python manage.py import_poi data/london.json
-docker-compose exec backend python manage.py import_poi "data/*.xml"
+docker-compose exec backend python manage.py import_poi_file data/pois.csv
+docker-compose exec backend python manage.py import_poi_file data/london.json
+docker-compose exec backend python manage.py import_poi_file "data/*.xml"
 ```
 
 Acess:
@@ -134,13 +136,13 @@ docker-compose down
 
 The PoIs files follow the structure below:
 
-**CSV**
+### CSV
 
-```
+```csv
 poi_id, poi_name, poi_latitude, poi_longitude, poi_category, poi_ratings
 ```
 
-**JSON**
+### JSON
 
 ```json
 [
@@ -169,7 +171,7 @@ poi_id, poi_name, poi_latitude, poi_longitude, poi_category, poi_ratings
 ]
 ```
 
-**XML**
+### XML
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -207,23 +209,27 @@ pytest
 
 ## 📝 Assumptions & Improvements
 
-**Assumptions**
+### Assumptions
 
 - `coordinates` in JSON can be a **list** `[lat, lon]` or an **object** `{latitude, longitude}`.
 - `ratings` accepts JSON array, single number, or string separated by `, ; |`. Invalid values are ignored.
 - Lat/Lon stored as `FloatField`. We do not use GeoDjango to keep the setup simple.
 
-**Possible Improvements**
+### Possible Improvements
 
-- Update `avg_rating` in the database + signals for recalculation when updating `ratings`.
-- Detailed error report by file/line (CSV/XML) and schema validation.
-- Spport the file import using the django-import-export.
+- All improvements are listed on this [board](https://trello.com/invite/b/68b79efc18b4c5b5f55ec0ef/ATTI0a769da9e60344a9e82c429fe9f2a0c2963B6985/th-searchsmartly).
+- Feel free to open an issue on this repo, to add, request or report a bug.
 
 ---
 
 ## 🤝 Contributing
 
-Feel free to open issues or PRs:
+To create a Pull Request, we asking to follow the best for it, in this case we recommend to follow the git convention and Angular recommendations for it:
+
+- [Git commit conventions](https://www.conventionalcommits.org/en/v1.0.0/);
+- [Angular recommendations](https://nitayneeman.com/blog/understanding-semantic-commit-messages-using-git-and-angular/);
+
+Based on that, feel free to open issues or PRs:
 
 ```bash
 git checkout -b feature/your-feature
