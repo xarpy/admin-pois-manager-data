@@ -17,7 +17,7 @@ from point_of_interest.models import POI, HistoricalImportData, SourceType
 )
 @pytest.mark.django_db
 def test_historical_import_creation(data, expected_source, expected_filename):
-    """"""
+    """Unit historical_import_data instance test"""
     obj = HistoricalImportData.objects.create(**data)
     assert isinstance(obj.id, uuid.UUID)
     assert obj.source == expected_source
@@ -44,7 +44,7 @@ def test_historical_import_creation(data, expected_source, expected_filename):
 )
 @pytest.mark.django_db
 def test_poi_creation(poi_data, expected_category):
-    """ """
+    """Unit poi instance test"""
     poi = POI.objects.create(**poi_data)
     assert isinstance(poi.id, uuid.UUID)
     assert poi.external_id == poi_data["external_id"]
