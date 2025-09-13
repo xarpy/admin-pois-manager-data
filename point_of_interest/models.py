@@ -54,21 +54,19 @@ class POI(models.Model):
             models.Index(fields=["category"]),
             models.Index(fields=["external_id"]),
         ]
+        constraints = [
+            models.UniqueConstraint(fields=["external_id"], name="unique_external_id")
+        ]
         ordering = ["created_at"]
 
     def __str__(self) -> str:
         return f"[{self.id}] {self.name} ({self.external_id})"
 
     @property
-    def avg_rating(self) -> Optional[Decimal]:
-        """Method responsible to calculate the rating average.
-        Returns:
-            Optional[Decimal]: Return a average result in decimals
-        """
-        result = None
-        rating_data = [float(rating) for rating in self.ratings]
-        if rating_data:
-            result = Decimal(mean(rating_data)).quantize(
-                Decimal("0.01"), rounding=ROUND_HALF_UP
-            )
-        return result
+    def avg_rating(self) -> float:
+        """Returns the average of ratings, limited between 0 and 5, with 2 decimal places."""
+        try:
+            data = [min(5.0, max(0.0, float(x))) for x in self.ratings]
+            return round(sum(data) / len(data), 2) if data else 0.0
+        except Exception:
+            return 0.0

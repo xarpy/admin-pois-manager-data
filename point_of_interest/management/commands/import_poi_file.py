@@ -1,3 +1,4 @@
+import glob
 from typing import Sequence
 
 from django.core.management.base import BaseCommand
@@ -26,13 +27,22 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **opts):
+
         paths: Sequence[str] = opts["paths"]
         chunksize: int = opts["chunksize"]
         batch_size: int = opts["batch_size"]
 
+        expanded_paths = []
+        for p in paths:
+            expanded = glob.glob(p)
+            if expanded:
+                expanded_paths.extend(expanded)
+            else:
+                expanded_paths.append(p)
+
         try:
             stats = ImportBuilder(
-                paths, chunksize=chunksize, batch_size=batch_size
+                expanded_paths, chunksize=chunksize, batch_size=batch_size
             ).run()
             self.stdout.write(self.style.SUCCESS("Data processed successfully"))
             self.stdout.write(
