@@ -26,27 +26,16 @@ class PointOfInterestAdmin(admin.ModelAdmin):
 
     @admin.display(ordering=None, description="Avg. rating")
     def avg_rating_display(self, obj: POI):
-        """Method responsible to display the rating data
-        Args:
-            obj (POI): Receives the POI instance
-        Returns:
-            Decimal: Return the avg_rating decimal value
-        """
+        """Displays the average rating value for the POI instance."""
         return obj.avg_rating
 
     def get_search_results(self, request, queryset: QuerySet, search_term: str):
-        """Method overrided to validate and search for POI Id or POI external ID.
-        Args:
-            request (HttpRequest): Receives the default request parameter.
-            queryset (QuerySet): Receives the default queryset parameter.
-            search_term (str): Receives the search term from admin form.
-        Returns:
-            tuple: Return a tuple containing a queryset to implement the search
-        and a boolean indicating if the results may contain duplicates.
-        """
+        """Search by UUID (internal id) or exact external_id (int), or fallback to default."""
         term_fmt = search_term.strip()
         qs, use_distinct = super().get_search_results(request, queryset, term_fmt)
         if validate_uuid(term_fmt):
             reference_id = UUID(term_fmt)
             qs = queryset.filter(pk=reference_id)
+        elif term_fmt.isdigit():
+            qs = queryset.filter(external_id=term_fmt)
         return qs, use_distinct
