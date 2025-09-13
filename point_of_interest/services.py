@@ -18,11 +18,7 @@ from point_of_interest.utils import (
 
 
 class ImportBuilder:
-    """Service class to handle the import of PoI data from various file formats.
-    Supports CSV, JSON (NDJSON and JSON array), and XML formats.
-    Using pandas for CSV/JSON processing and a custom XML iterator for XML files.
-    Performs upsert operations in batches for efficiency.
-    """
+    """Imports PoIs from CSV, JSON or XML files, performing batch upserts."""
 
     def __init__(
         self,
@@ -36,12 +32,7 @@ class ImportBuilder:
         self.batch_size = int(batch_size)
 
     def run(self) -> ImportStats:
-        """Run the import process for all specified files.
-        Raises:
-            ImportServiceError: If there is an error during the import process.
-        Returns:
-            ImportStats: The statistics of the import process.
-        """
+        """Runs the import process for all provided files."""
         stats = ImportStats()
         for path in self.paths:
             try:
@@ -53,24 +44,16 @@ class ImportBuilder:
                     source=source_from_path(path),
                     filename=path.name,
                 )
-            except Exception as error:  # noqa: BLE001
+            except FileNotFoundError as error:
+                raise ImportServiceError(f"File not found: '{path}'") from error
+            except (ValueError, KeyError, TypeError) as error:
                 raise ImportServiceError(
-                    f"Failed processing '{path}': {error}"
+                    f"Invalid data or format in '{path}': {error}"
                 ) from error
         return stats
 
-    def _process_file(
-        self, path: Path
-    ) -> tuple[int, int] | FileNotFoundError | ImportServiceError:
-        """Method to process a single file for import.
-        Args:
-            path (Path): The file path to process.
-        Raises:
-            FileNotFoundError: If the file is not found.
-            ImportServiceError: If there is an error processing the file.
-        Returns:
-            tuple[int, int]: The number of created and updated records, or an error.
-        """
+    def _process_file(self, path: Path) -> tuple[int, int]:
+        """Processes a single file and returns (created, updated)."""
         created = 0
         updated = 0
         source = source_from_path(path)
@@ -81,7 +64,9 @@ class ImportBuilder:
                         normalize_record(row, source)
                         for row in df.to_dict(orient="records")
                     ]
-                created, updated = self._upsert_rows(rows)
+                    c, u = self._upsert_rows(rows)
+                    created += c
+                    updated += u
                 return created, updated
             case SourceType.JSON:
                 try:
@@ -90,7 +75,9 @@ class ImportBuilder:
                             normalize_record(row, source)
                             for row in df.to_dict(orient="records")
                         ]
-                        created, updated = self._upsert_rows(rows)
+                        c, u = self._upsert_rows(rows)
+                        created += c
+                        updated += u
                     return created, updated
                 except ValueError:
                     data = json.loads(path.read_text(encoding="utf-8"))
@@ -98,17 +85,23 @@ class ImportBuilder:
                         data = [data]
                     for chunk in batched(data, self.chunksize):
                         rows = [normalize_record(row, source) for row in chunk]
-                        created, updated = self._upsert_rows(rows)
+                        c, u = self._upsert_rows(rows)
+                        created += c
+                        updated += u
                     return created, updated
             case SourceType.XML:
                 buffer = []
                 for raw in iter_xml_dicts(path):
                     buffer.append(normalize_record(raw, source))
                     if len(buffer) >= self.chunksize:
-                        created, updated = self._upsert_rows(buffer)
+                        c, u = self._upsert_rows(buffer)
+                        created += c
+                        updated += u
                         buffer = []
                 if buffer:
-                    created, updated = self._upsert_rows(buffer)
+                    c, u = self._upsert_rows(buffer)
+                    created += c
+                    updated += u
                 return created, updated
             case _:
                 if not path.exists():
@@ -118,12 +111,7 @@ class ImportBuilder:
 
     @transaction.atomic
     def _upsert_rows(self, rows: List[Dict[str, Any]]) -> tuple[int, int]:
-        """Upsert rows into the database.
-        Args:
-            rows (List[Dict[str, Any]]): The rows to upsert.
-        Returns:
-            tuple[int, int]: The number of created and updated records.
-        """
+        """Performs upsert of records in the database. Returns (created, updated)."""
         created = 0
         updated = 0
         if rows:

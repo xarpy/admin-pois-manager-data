@@ -32,15 +32,7 @@ class ImportData:
 
     @staticmethod
     def _parse_ratings(raw: Any) -> list[float]:
-        """Method to parse ratings into a list[float].
-            Accepts: list/tuple, number, JSON array string, or a delimiter-separated string.
-            Delimiters accepted: comma, semicolon, pipe, whitespace.
-            Invalid tokens are ignored.
-        Args:
-            raw (Any): The raw input to parse.
-        Returns:
-            List[float]: A list of parsed float ratings.
-        """
+        """Converts ratings to a list of floats, limiting values between 0 and 5 and to 2 decimal places."""
         result = []
         if not (raw is None or raw == ""):
             if isinstance(raw, (list, tuple)):
@@ -59,7 +51,10 @@ class ImportData:
 
             for value in sequence:
                 try:
-                    result.append(float(value))
+                    val = float(value)
+                    val = min(5.0, max(0.0, val))
+                    val = round(val, 2)
+                    result.append(val)
                 except (TypeError, ValueError):
                     continue
         return result
@@ -90,12 +85,24 @@ class ImportData:
                 return instance
             case SourceType.JSON:
                 ratings = cls._parse_ratings(raw=row.get("ratings"))
-                coords = row.get("coordinates") or {}
+                coords = row.get("coordinates")
+                lat, lon = None, None
                 if isinstance(coords, (list, tuple)) and len(coords) >= 2:
-                    lat, lon = float(coords[0]), float(coords[1])
-                else:
-                    lat = float((coords or {}).get("latitude"))
-                    lon = float((coords or {}).get("longitude"))
+                    try:
+                        lat = float(coords[0])
+                        lon = float(coords[1])
+                    except (TypeError, ValueError):
+                        lat, lon = None, None
+                elif isinstance(coords, dict):
+                    try:
+                        lat_raw = coords.get("latitude")
+                        lon_raw = coords.get("longitude")
+                        lat = float(lat_raw) if lat_raw is not None else None
+                        lon = float(lon_raw) if lon_raw is not None else None
+                    except (TypeError, ValueError):
+                        lat, lon = None, None
+                if lat is None or lon is None:
+                    raise ValueError("Invalid or missing coordinates in JSON row")
                 instance = cls(
                     external_id=str(row["id"]).strip(),
                     name=str(row["name"]).strip(),
